@@ -13,7 +13,7 @@ A free, open-source PDF merger that works entirely in your browser. No uploads, 
 
 ## How to Use
 
-1. Visit [https://yourusername.github.io/pdf-joiner](https://yourusername.github.io/pdf-joiner)
+1. Visit [https://universussoft.github.io/pdf-joiner](https://universussoft.github.io/pdf-joiner)
 2. Select PDF files (drag & drop or click to browse)
 3. Reorder files if needed using the arrows
 4. Click "Merge PDFs"
@@ -39,4 +39,4 @@ To run locally:
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/pdf-joiner.git
+git clone https://github.com/universussoft/pdf-joiner.git
