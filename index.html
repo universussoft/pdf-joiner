@@ -3,14 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF Joiner - Merge PDFs Online</title>
+    <title>PDF Joiner - Free PDF Merger</title>
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📄</text></svg>">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1><span class="pdf-icon">📄</span> PDF Joiner</h1>
+            <div class="header-top">
+                <h1><span class="pdf-icon">📄</span> PDF Joiner</h1>
+                <button class="theme-toggle" onclick="toggleTheme()">
+                    <span class="theme-icon">🌙</span>
+                </button>
+            </div>
             <p class="subtitle">Merge multiple PDF files into one document - 100% free & secure</p>
             <p class="warning">⚠️ All processing happens in your browser. No files are uploaded to any server!</p>
         </header>
@@ -45,7 +50,7 @@
                 <h3>How to use:</h3>
                 <ol>
                     <li>Select PDF files using the button above or drag & drop</li>
-                    <li>Reorder files using the up/down arrows if needed</li>
+                    <li>Reorder files using the arrows if needed</li>
                     <li>Click "Merge PDFs" to combine them</li>
                     <li>Download your merged PDF file</li>
                 </ol>
@@ -56,8 +61,10 @@
         <footer>
             <p>Made with ❤️ | 
                 <a href="https://github.com/yourusername/pdf-joiner" target="_blank">View on GitHub</a> | 
-                <a href="https://github.com/yourusername/pdf-joiner/issues" target="_blank">Report Issue</a>
+                <a href="https://github.com/yourusername/pdf-joiner/issues" target="_blank">Report Issue</a> |
+                <a href="#" onclick="showDonationModal(); return false;">Support Project</a>
             </p>
+            <p class="donation-note">This tool is free. If you found it useful, consider supporting the development!</p>
         </footer>
     </div>
 
@@ -70,6 +77,34 @@
             <p class="processing-note">Processing locally in your browser</p>
         </div>
     </div>
+
+    <!-- Simple Donation Modal -->
+    <div class="modal" id="donationModal" style="display: none;">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeDonationModal()">×</button>
+            <h2>💝 Support This Project</h2>
+            <p>This PDF Joiner is 100% free and ad-free!</p>
+            <p>Your donation helps maintain and improve this tool.</p>
+            
+            <div class="donation-main">
+                <a href="https://paypal.me/edobgames?locale.x=pt_PT&country.x=PT" 
+                   target="_blank" 
+                   class="donate-btn">
+                    <span class="paypal-icon">💰</span>
+                    Donate with PayPal
+                </a>
+                
+                <p class="donation-info">
+                    <small>Any amount is appreciated! Thank you for your support! 🙏</small>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Simple Donation Button -->
+    <button class="donation-btn" onclick="showDonationModal()">
+        💝 Support
+    </button>
 
     <!-- Scripts -->
     <script src="https://unpkg.com/pdf-lib@^1.17.1/dist/pdf-lib.min.js"></script>

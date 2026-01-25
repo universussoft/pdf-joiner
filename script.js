@@ -1,7 +1,43 @@
 let pdfFiles = [];
+let isDarkTheme = true; // Default to dark theme
+
+// Initialize theme
+function initTheme() {
+    const savedTheme = localStorage.getItem('pdfJoinerTheme');
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-theme');
+        isDarkTheme = false;
+        updateThemeIcon();
+    }
+}
+
+// Toggle theme
+function toggleTheme() {
+    isDarkTheme = !isDarkTheme;
+    
+    if (isDarkTheme) {
+        document.body.classList.remove('light-theme');
+        localStorage.setItem('pdfJoinerTheme', 'dark');
+    } else {
+        document.body.classList.add('light-theme');
+        localStorage.setItem('pdfJoinerTheme', 'light');
+    }
+    
+    updateThemeIcon();
+}
+
+// Update theme icon
+function updateThemeIcon() {
+    const themeIcon = document.querySelector('.theme-icon');
+    if (themeIcon) {
+        themeIcon.textContent = isDarkTheme ? '🌙' : '☀️';
+    }
+}
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
+    initTheme();
+    
     // File input change handler
     document.getElementById('fileInput').addEventListener('change', handleFileSelect);
     
@@ -27,7 +63,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (files.length > 0) {
             addFiles(files);
         } else {
-            alert('Please drop PDF files only');
+            showMessage('Please drop PDF files only', 'error');
+        }
+    });
+    
+    // Donation modal close on outside click
+    document.getElementById('donationModal').addEventListener('click', (e) => {
+        if (e.target.id === 'donationModal') {
+            closeDonationModal();
         }
     });
 });
@@ -39,26 +82,97 @@ function handleFileSelect(e) {
 
 // Add files to the list
 function addFiles(files) {
+    let addedCount = 0;
+    
     files.forEach(file => {
         if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
-            alert(`"${file.name}" is not a PDF file. Skipping...`);
+            showMessage(`"${file.name}" is not a PDF file. Skipping...`, 'warning');
             return;
         }
         
         if (pdfFiles.some(pdf => pdf.name === file.name && pdf.size === file.size)) {
-            alert(`"${file.name}" is already in the list`);
+            showMessage(`"${file.name}" is already in the list`, 'info');
+            return;
+        }
+        
+        if (file.size > 100 * 1024 * 1024) { // 100MB limit
+            showMessage(`"${file.name}" is too large (max 100MB)`, 'error');
             return;
         }
         
         pdfFiles.push({
             file: file,
             name: file.name,
-            size: formatFileSize(file.size)
+            size: formatFileSize(file.size),
+            date: new Date().toISOString()
         });
+        addedCount++;
     });
     
-    renderFileList();
-    updateFileCount();
+    if (addedCount > 0) {
+        renderFileList();
+        updateFileCount();
+        showMessage(`${addedCount} file(s) added`, 'success');
+    }
+}
+
+// Show message
+function showMessage(text, type = 'info') {
+    // Create message element
+    const message = document.createElement('div');
+    message.className = `message message-${type}`;
+    message.textContent = text;
+    message.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 25px;
+        border-radius: 8px;
+        color: white;
+        font-weight: 600;
+        z-index: 1000;
+        animation: slideIn 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    `;
+    
+    // Set colors based on type
+    const colors = {
+        success: '#2ecc71',
+        error: '#e74c3c',
+        warning: '#f39c12',
+        info: '#3498db'
+    };
+    
+    message.style.background = colors[type] || colors.info;
+    
+    document.body.appendChild(message);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        message.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => {
+            if (message.parentNode) {
+                document.body.removeChild(message);
+            }
+        }, 300);
+    }, 3000);
+    
+    // Add CSS animations
+    if (!document.querySelector('#message-styles')) {
+        const style = document.createElement('style');
+        style.id = 'message-styles';
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+    }
 }
 
 // Render file list
@@ -114,9 +228,11 @@ function formatFileSize(bytes) {
 
 // Remove a file
 function removeFile(index) {
+    const fileName = pdfFiles[index].name;
     pdfFiles.splice(index, 1);
     renderFileList();
     updateFileCount();
+    showMessage(`"${fileName}" removed`, 'info');
 }
 
 // Move file up or down
@@ -132,22 +248,31 @@ function clearAll() {
     if (pdfFiles.length === 0) return;
     
     if (confirm('Are you sure you want to clear all files?')) {
+        const count = pdfFiles.length;
         pdfFiles = [];
         document.getElementById('fileInput').value = '';
         renderFileList();
         updateFileCount();
+        showMessage(`${count} file(s) cleared`, 'info');
     }
 }
 
 // Merge PDFs
 async function mergePDFs() {
     if (pdfFiles.length < 2) {
-        alert('Please select at least 2 PDF files to merge');
+        showMessage('Please select at least 2 PDF files to merge', 'warning');
         return;
     }
     
     if (pdfFiles.length > 20) {
-        alert('For performance reasons, please select no more than 20 PDF files at once');
+        showMessage('For performance reasons, please select no more than 20 PDF files at once', 'warning');
+        return;
+    }
+    
+    // Calculate total size
+    const totalSize = pdfFiles.reduce((sum, pdf) => sum + pdf.file.size, 0);
+    if (totalSize > 200 * 1024 * 1024) { // 200MB total limit
+        showMessage('Total file size exceeds 200MB. Please reduce the number of files.', 'error');
         return;
     }
     
@@ -160,11 +285,13 @@ async function mergePDFs() {
         loadingText.textContent = 'Initializing merge...';
         const mergedPdf = await PDFLib.PDFDocument.create();
         let totalPages = 0;
+        let processedFiles = 0;
         
         // Process each PDF
         for (let i = 0; i < pdfFiles.length; i++) {
             const pdfInfo = pdfFiles[i];
-            loadingText.textContent = `Processing: ${pdfInfo.name} (${i + 1}/${pdfFiles.length})...`;
+            processedFiles++;
+            loadingText.textContent = `Processing: ${pdfInfo.name} (${processedFiles}/${pdfFiles.length})...`;
             
             try {
                 const arrayBuffer = await pdfInfo.file.arrayBuffer();
@@ -180,7 +307,9 @@ async function mergePDFs() {
             }
             
             // Add small delay to prevent blocking UI
-            await new Promise(resolve => setTimeout(resolve, 10));
+            if (i < pdfFiles.length - 1) {
+                await new Promise(resolve => setTimeout(resolve, 50));
+            }
         }
         
         loadingText.textContent = 'Finalizing merged document...';
@@ -189,12 +318,13 @@ async function mergePDFs() {
         // Create download
         const blob = new Blob([mergedPdfBytes], { type: 'application/pdf' });
         const url = URL.createObjectURL(blob);
-        const timestamp = new Date().toISOString().split('T')[0];
-        const filename = `merged-${timestamp}.pdf`;
+        const timestamp = new Date().toLocaleDateString('en-US').replace(/\//g, '-');
+        const filename = `merged-pdf-${timestamp}.pdf`;
         
         const link = document.createElement('a');
         link.href = url;
         link.download = filename;
+        link.style.display = 'none';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -203,14 +333,25 @@ async function mergePDFs() {
         setTimeout(() => URL.revokeObjectURL(url), 100);
         
         // Show success message
-        loadingText.textContent = `✅ Successfully merged ${pdfFiles.length} PDFs (${totalPages} pages)!`;
+        loadingText.textContent = `✅ Success! ${pdfFiles.length} PDFs merged (${totalPages} pages)!`;
+        showMessage(`PDF created successfully! ${totalPages} pages`, 'success');
+        
         setTimeout(() => {
             modal.style.display = 'none';
         }, 2000);
         
     } catch (error) {
         modal.style.display = 'none';
-        alert(`Error merging PDFs: ${error.message}`);
-        console.error('Merge error:', error);
+        showMessage(`Error: ${error.message}`, 'error');
+        console.error('Error merging PDFs:', error);
     }
+}
+
+// Donation modal functions
+function showDonationModal() {
+    document.getElementById('donationModal').style.display = 'flex';
+}
+
+function closeDonationModal() {
+    document.getElementById('donationModal').style.display = 'none';
 }
