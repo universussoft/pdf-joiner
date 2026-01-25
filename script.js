@@ -3,12 +3,20 @@ let isDarkTheme = true; // Default to dark theme
 
 // Initialize theme
 function initTheme() {
+    // Check saved theme or default to dark
     const savedTheme = localStorage.getItem('pdfJoinerTheme');
+    
     if (savedTheme === 'light') {
+        // Switch to light theme
         document.body.classList.add('light-theme');
         isDarkTheme = false;
-        updateThemeIcon();
+    } else {
+        // Default to dark theme
+        document.body.classList.remove('light-theme');
+        isDarkTheme = true;
     }
+    
+    updateThemeIcon();
 }
 
 // Toggle theme
@@ -16,11 +24,15 @@ function toggleTheme() {
     isDarkTheme = !isDarkTheme;
     
     if (isDarkTheme) {
+        // Switch to dark theme
         document.body.classList.remove('light-theme');
         localStorage.setItem('pdfJoinerTheme', 'dark');
+        console.log('Switched to dark theme');
     } else {
+        // Switch to light theme
         document.body.classList.add('light-theme');
         localStorage.setItem('pdfJoinerTheme', 'light');
+        console.log('Switched to light theme');
     }
     
     updateThemeIcon();
@@ -31,12 +43,20 @@ function updateThemeIcon() {
     const themeIcon = document.querySelector('.theme-icon');
     if (themeIcon) {
         themeIcon.textContent = isDarkTheme ? '🌙' : '☀️';
+        console.log('Theme icon updated to:', themeIcon.textContent);
     }
 }
 
-// Initialize
+// Initialize everything when page loads
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('PDF Joiner initialized');
+    
+    // Initialize theme
     initTheme();
+    
+    // Test: Log current theme
+    console.log('Initial theme:', isDarkTheme ? 'dark' : 'light');
+    console.log('Body has light-theme class:', document.body.classList.contains('light-theme'));
     
     // File input change handler
     document.getElementById('fileInput').addEventListener('change', handleFileSelect);
@@ -73,7 +93,35 @@ document.addEventListener('DOMContentLoaded', () => {
             closeDonationModal();
         }
     });
+    
+    // Close donation modal with Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && document.getElementById('donationModal').style.display === 'flex') {
+            closeDonationModal();
+        }
+    });
+    
+    // Add test button for debugging theme
+    // Uncomment this for debugging:
+    // addDebugButton();
 });
+
+// Debug function - add a test button
+function addDebugButton() {
+    const debugBtn = document.createElement('button');
+    debugBtn.innerHTML = '🔧 Debug Theme';
+    debugBtn.style.cssText = 'position:fixed; top:10px; left:10px; background:#333; color:white; padding:10px; z-index:9999; border:none; border-radius:5px; cursor:pointer;';
+    debugBtn.onclick = function() {
+        console.log('=== THEME DEBUG INFO ===');
+        console.log('isDarkTheme:', isDarkTheme);
+        console.log('Has light-theme class:', document.body.classList.contains('light-theme'));
+        console.log('Saved theme:', localStorage.getItem('pdfJoinerTheme'));
+        console.log('Body classes:', document.body.className);
+        console.log('Root variables:', getComputedStyle(document.documentElement).getPropertyValue('--bg-color'));
+        alert('Check console for theme debug info');
+    };
+    document.body.appendChild(debugBtn);
+}
 
 // Handle file selection
 function handleFileSelect(e) {
@@ -157,7 +205,7 @@ function showMessage(text, type = 'info') {
         }, 300);
     }, 3000);
     
-    // Add CSS animations
+    // Add CSS animations if not already added
     if (!document.querySelector('#message-styles')) {
         const style = document.createElement('style');
         style.id = 'message-styles';
@@ -352,7 +400,6 @@ function showDonationModal() {
     const modal = document.getElementById('donationModal');
     if (modal) {
         modal.style.display = 'flex';
-        // Prevent body scroll when modal is open
         document.body.style.overflow = 'hidden';
     }
 }
@@ -361,29 +408,15 @@ function closeDonationModal() {
     const modal = document.getElementById('donationModal');
     if (modal) {
         modal.style.display = 'none';
-        // Restore body scroll
         document.body.style.overflow = 'auto';
     }
 }
 
-// Close modal when clicking outside
-document.addEventListener('DOMContentLoaded', () => {
-    // ... (your existing initialization code)
-    
-    // Close modal when clicking outside (updated version)
-    const donationModal = document.getElementById('donationModal');
-    if (donationModal) {
-        donationModal.addEventListener('click', (e) => {
-            if (e.target === donationModal) {
-                closeDonationModal();
-            }
-        });
-        
-        // Close modal with Escape key
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && donationModal.style.display === 'flex') {
-                closeDonationModal();
-            }
-        });
-    }
-});
+// Make functions available globally
+window.toggleTheme = toggleTheme;
+window.showDonationModal = showDonationModal;
+window.closeDonationModal = closeDonationModal;
+window.mergePDFs = mergePDFs;
+window.clearAll = clearAll;
+window.moveFile = moveFile;
+window.removeFile = removeFile;
