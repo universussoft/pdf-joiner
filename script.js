@@ -349,9 +349,41 @@ async function mergePDFs() {
 
 // Donation modal functions
 function showDonationModal() {
-    document.getElementById('donationModal').style.display = 'flex';
+    const modal = document.getElementById('donationModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        // Prevent body scroll when modal is open
+        document.body.style.overflow = 'hidden';
+    }
 }
 
 function closeDonationModal() {
-    document.getElementById('donationModal').style.display = 'none';
+    const modal = document.getElementById('donationModal');
+    if (modal) {
+        modal.style.display = 'none';
+        // Restore body scroll
+        document.body.style.overflow = 'auto';
+    }
 }
+
+// Close modal when clicking outside
+document.addEventListener('DOMContentLoaded', () => {
+    // ... (your existing initialization code)
+    
+    // Close modal when clicking outside (updated version)
+    const donationModal = document.getElementById('donationModal');
+    if (donationModal) {
+        donationModal.addEventListener('click', (e) => {
+            if (e.target === donationModal) {
+                closeDonationModal();
+            }
+        });
+        
+        // Close modal with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && donationModal.style.display === 'flex') {
+                closeDonationModal();
+            }
+        });
+    }
+});
