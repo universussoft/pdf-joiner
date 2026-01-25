@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Joiner - Merge PDFs Online</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📄</text></svg>">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><span class="pdf-icon">📄</span> PDF Joiner</h1>
+            <p class="subtitle">Merge multiple PDF files into one document - 100% free & secure</p>
+            <p class="warning">⚠️ All processing happens in your browser. No files are uploaded to any server!</p>
+        </header>
+
+        <div class="main-content">
+            <!-- File Upload Area -->
+            <div class="upload-area" id="dropZone">
+                <div class="upload-icon">📤</div>
+                <h3>Drop PDF files here</h3>
+                <p>or click to browse</p>
+                <input type="file" id="fileInput" multiple accept=".pdf" hidden>
+                <button class="browse-btn" onclick="document.getElementById('fileInput').click()">
+                    Select PDF Files
+                </button>
+                <p class="file-types">Supports .pdf files only</p>
+            </div>
+
+            <!-- Selected Files List -->
+            <div class="files-section" id="filesSection" style="display: none;">
+                <h3>Selected Files <span id="fileCount">(0)</span></h3>
+                <div class="files-list" id="filesList">
+                    <!-- Files will be added here dynamically -->
+                </div>
+                <div class="files-actions">
+                    <button class="btn secondary" onclick="clearAll()">Clear All</button>
+                    <button class="btn" onclick="mergePDFs()">Merge PDFs</button>
+                </div>
+            </div>
+
+            <!-- Instructions -->
+            <div class="instructions">
+                <h3>How to use:</h3>
+                <ol>
+                    <li>Select PDF files using the button above or drag & drop</li>
+                    <li>Reorder files using the up/down arrows if needed</li>
+                    <li>Click "Merge PDFs" to combine them</li>
+                    <li>Download your merged PDF file</li>
+                </ol>
+                <p><strong>Privacy:</strong> All processing happens locally in your browser. No files are uploaded to any server.</p>
+            </div>
+        </div>
+
+        <footer>
+            <p>Made with ❤️ | 
+                <a href="https://github.com/yourusername/pdf-joiner" target="_blank">View on GitHub</a> | 
+                <a href="https://github.com/yourusername/pdf-joiner/issues" target="_blank">Report Issue</a>
+            </p>
+        </footer>
+    </div>
+
+    <!-- Loading Modal -->
+    <div class="modal" id="loadingModal" style="display: none;">
+        <div class="modal-content">
+            <div class="loader"></div>
+            <h3>Merging PDFs...</h3>
+            <p id="loadingText">Please wait while we merge your files</p>
+            <p class="processing-note">Processing locally in your browser</p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/pdf-lib@^1.17.1/dist/pdf-lib.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
