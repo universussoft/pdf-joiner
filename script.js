@@ -312,11 +312,6 @@ async function mergePDFs() {
         return;
     }
     
-    if (pdfFiles.length > 20) {
-        showMessage('For performance reasons, please select no more than 20 PDF files at once', 'warning');
-        return;
-    }
-    
     // Calculate total size
     const totalSize = pdfFiles.reduce((sum, pdf) => sum + pdf.file.size, 0);
     if (totalSize > 200 * 1024 * 1024) { // 200MB total limit
